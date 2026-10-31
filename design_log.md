@@ -46,6 +46,19 @@
 - **缺点**：内容泛化，未把设计与实验一的需求编号对应；把“尚待确认”的规则写成已实现；图表说明与图本身不一致；AI 使用记录只有结论，没有生成结果与修改过程。
 - **修改方向**：按模块—需求映射重写，并补充可核对的设计决策（REV-004）。
 
+## REV-001 重建领域模型与分层结构（人工修改）
+
+- **审查发现**：初稿类图只覆盖“能报名”的顺利路径，无法承载实验一已确认的并发、幂等、截止、取消和审计规则；组件图把界面直接连到数据库，没有可替换的事务边界。
+- **修改内容**：
+  1. 删除界面类与 `UserService` 的登录实现细节，改为 `Role` 枚举与独立的 `AuthorizationService`；
+  2. `Event` 增加 `EventState` 六种状态与版本号，`EventSession`、`TicketType` 各自维护容量与占用数，并提供 `remaining()`；
+  3. `Registration` 改用 `RegistrationState` 枚举（七种状态），删除 `checkedIn` 布尔字段；新增 `Credential`、`WaitlistEntry`、`WaitlistState`；
+  4. 新增 `IdempotencyService`（requestId）、`DeadlinePolicy`、`WaitlistManager`、`TransactionManager`、`ServerClock`、`AuditService`、`Notification`；
+  5. 类图拆为两张：`UML类图` 只放领域实体与状态，`UML服务类图` 表达报名服务的协作对象；
+  6. 组件图改为“表现层—应用服务层—领域层—基础设施层”，明确报名、检票写入经过事务管理器，截止判定使用服务器时钟。
+- **修改后结果**：见 `UML/UML类图.png`、`UML/UML服务类图.png`、`UML/UML组件图.png`。
+- **仍待处理**：动态图与 UI 尚未同步（REV-002、REV-003）。
+
 ## 人工审查清单（初稿）
 
 - [ ] 模块划分是否覆盖实验一全部已确认需求

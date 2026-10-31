@@ -2,71 +2,148 @@
 skinparam defaultFontName "Noto Sans CJK SC"
 skinparam classAttributeIconSize 0
 skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam classFontSize 16
 hide empty members
 
-package "用户管理" {
+' Domain model: entities, value objects and state enumerations.
+
+package "用户与权限" {
   class User {
-    - id: Long
+    - userId: Long
     - account: String
-    - password: String
-    - role: String
+    - displayName: String
+    - role: Role
+    - active: boolean
   }
-  class UserService {
-    + login(account: String, password: String): User
-    + register(account: String, password: String): User
+  enum Role {
+    参与者
+    组织者
+    检票人员
+    平台管理员
   }
 }
 
-package "活动管理" {
+package "活动与场次" {
   class Event {
-    - id: Long
+    - eventId: Long
     - title: String
     - city: String
-    - category: String
-    - state: String
+    - registrationDeadline: LocalDateTime
+    - state: EventState
+    - version: int
+  }
+  enum EventState {
+    草稿
+    待审核
+    审核驳回
+    已发布
+    已取消
+    已结束
   }
   class EventSession {
-    - id: Long
+    - sessionId: Long
     - startTime: LocalDateTime
     - endTime: LocalDateTime
+    - capacity: int
+    - occupied: int
+    + remaining(): int
   }
   class TicketType {
-    - id: Long
+    - ticketTypeId: Long
     - name: String
     - capacity: int
     - occupied: int
-  }
-  class EventService {
-    + createEvent(event: Event): Long
-    + addSession(eventId: Long, session: EventSession): Long
-    + addTicketType(sessionId: Long, ticket: TicketType): Long
+    + remaining(): int
   }
 }
 
-package "报名管理" {
+package "报名与候补" {
   class Registration {
-    - id: Long
-    - status: String
-    - checkedIn: boolean
-    - registeredAt: LocalDateTime
+    - registrationId: Long
+    - requestId: String
+    - state: RegistrationState
+    - registeredAt: Instant
+    - checkedInAt: Instant
   }
-  class RegistrationService {
-    + register(userId: Long, sessionId: Long, ticketTypeId: Long): Registration
-    + cancel(registrationId: Long): void
+  enum RegistrationState {
+    已报名
+    候补中
+    已取消
+    已签到
+    缺席
+    活动取消
+    候补失效
+  }
+  class WaitlistEntry {
+    - waitlistId: Long
+    - queueNo: long
+    - state: WaitlistState
+    - createdAt: Instant
+  }
+  enum WaitlistState {
+    排队中
+    已递补
+    已失效
+    已取消
+  }
+  class Credential {
+    - credentialId: Long
+    - code: String
+    - issuedAt: Instant
   }
 }
 
-package "界面" {
-  class EventListPage
-  class RegistrationDialog
+package "签到与审计" {
+  class CheckInRecord {
+    - checkInId: Long
+    - checkedAt: Instant
+    - result: String
+  }
+  class OperationLog {
+    - logId: Long
+    - action: String
+    - targetType: String
+    - targetId: Long
+    - result: String
+    - occurredAt: Instant
+  }
 }
+
+package "通知" {
+  class Notification {
+    - notificationId: Long
+    - type: String
+    - status: NotificationStatus
+    - retryCount: int
+  }
+  enum NotificationStatus {
+    待发送
+    已发送
+    失败
+  }
+}
+
+' Relationships.
 
 User "1" -- "0..*" Event : 创建 >
-Event "1" *-- "0..*" EventSession
-EventSession "1" *-- "0..*" TicketType
-TicketType "1" -- "0..*" Registration
-User "1" -- "0..*" Registration
-EventListPage --> EventService
-RegistrationDialog --> RegistrationService
-UserService ..> User
+Event "1" *-- "1..*" EventSession : 包含 >
+EventSession "1" *-- "1..*" TicketType : 设置 >
+EventSession "1" *-- "0..*" Registration : 产生 >
+TicketType "1" -- "0..*" Registration : 对应 >
+User "1" -- "0..*" Registration : 提交 >
+Registration "1" -- "0..1" Credential : 发放 >
+EventSession "1" *-- "0..*" WaitlistEntry : 排队 >
+User "1" -- "0..*" WaitlistEntry : 登记 >
+Registration "1" -- "0..1" CheckInRecord : 核验 >
+User "1" -- "0..*" CheckInRecord : 检票人 >
+User "1" -- "0..*" OperationLog : 操作 >
+User "1" -- "0..*" Notification : 接收 >
+
+note right of Registration
+  REQ-011: 仅允许
+  候补中→已报名，
+  已报名→已签到/已取消/缺席，
+  以及活动取消、截止失效两类系统迁移。
+end note
 @enduml

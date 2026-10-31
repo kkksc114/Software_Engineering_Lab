@@ -1,0 +1,72 @@
+@startuml
+skinparam defaultFontName "Noto Sans CJK SC"
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam classFontSize 15
+skinparam nodesep 18
+skinparam ranksep 36
+hide empty members
+
+class RegistrationService {
+  + register(cmd: RegistrationCommand): RegistrationResult
+  + cancel(registrationId: Long, actor: User): void
+}
+class IdempotencyService {
+  + execute(requestId: String, work: Supplier): RegistrationResult
+}
+class DeadlinePolicy {
+  + isOpen(event: Event, now: Instant): boolean
+}
+class AuthorizationService {
+  + authorize(actor: User, action: Action, target: Object): void
+}
+class WaitlistManager {
+  + enqueue(sessionId: Long, userId: Long, ticketTypeId: Long): WaitlistEntry
+  + promoteHead(sessionId: Long): Registration
+  + expireAll(sessionId: Long): void
+}
+class TransactionManager {
+  + execute(work: Supplier): Object
+}
+class ServerClock {
+  + now(): Instant
+}
+class Registration <<实体>> {
+  - registrationId: Long
+  - requestId: String
+  - state: RegistrationState
+}
+class EventSession <<实体>> {
+  - sessionId: Long
+  - capacity: int
+  - occupied: int
+}
+class WaitlistEntry <<实体>> {
+  - waitlistId: Long
+  - queueNo: long
+  - state: WaitlistState
+}
+class Credential <<实体>> {
+  - credentialId: Long
+  - code: String
+}
+
+RegistrationService ..> IdempotencyService
+RegistrationService ..> DeadlinePolicy
+RegistrationService ..> AuthorizationService
+RegistrationService ..> WaitlistManager
+RegistrationService ..> TransactionManager
+RegistrationService ..> Registration
+RegistrationService ..> EventSession
+DeadlinePolicy ..> ServerClock
+WaitlistManager ..> WaitlistEntry
+WaitlistManager ..> Registration
+Registration "1" -- "0..1" Credential
+
+note right of RegistrationService
+  并发控制：requestId 幂等，
+  事务内锁定场次并复查活动状态，
+  名额释放后仅在截止前递补。
+end note
+@enduml
