@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>检票核验 - 票集</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">票集<small>活动票务与报名系统</small></div>
+  <nav class="nav">
+    <a class="active" href="#">检票核验</a>
+    <a href="#">核验记录</a>
+  </nav>
+  <div class="spacer"></div>
+  <div class="userchip">
+    <div class="avatar" style="background:#fffbeb;color:#b45309">检</div>
+    <div><div class="name">周检票</div><div class="role">检票人员</div></div>
+  </div>
+</header>
+
+<main class="main" style="max-width:1160px">
+  <div class="page-head">
+    <div>
+      <h1>检票核验</h1>
+      <div class="sub">仅可核验被授权场次；重复核验不会重复计数</div>
+    </div>
+    <span class="badge info">当前场次：城市音乐节 · 周五夜场</span>
+  </div>
+
+  <div class="split">
+    <section class="panel">
+      <h2>核验凭证</h2>
+      <div class="field" style="margin-bottom:12px">
+        <label>授权场次</label>
+        <select><option>城市音乐节 · 周五夜场（已授权）</option><option>城市音乐节 · 周六午场（未授权）</option></select>
+      </div>
+      <div class="field">
+        <label>凭证码</label>
+        <input class="input" style="height:52px;font-size:18px;letter-spacing:2px" value="NJU-7F3K-92QX">
+      </div>
+      <div class="actions" style="margin-top:14px">
+        <button class="btn btn-primary" style="flex:1">核验并签到</button>
+        <button class="btn btn-ghost">清空</button>
+      </div>
+
+      <div class="result-ok" style="margin-top:18px">
+        <div class="head">核验通过</div>
+        <div>陆知渔 · 普通票 · 11 月 15 日 19:30</div>
+        <div class="small" style="margin-top:6px">签到时间 19:42:08 · 检票人 周检票 · 已写入操作日志</div>
+      </div>
+
+      <div class="result-bad" style="margin-top:12px">
+        <b>常见失败原因</b>：场次未授权、活动已取消、凭证不属于本场次、记录不是“已报名”、重复核验（提示已签到）。
+      </div>
+
+      <div class="footer-note">签到与取消并发时仅一个操作成功；已签到记录不能取消（REQ-011/017）。</div>
+    </section>
+
+    <section class="panel">
+      <h2>本场核验概况</h2>
+      <div class="stats" style="grid-template-columns:repeat(2,1fr);margin-bottom:14px">
+        <div class="stat ok"><div class="k">已签到</div><div class="v">128<small>/ 200</small></div></div>
+        <div class="stat"><div class="k">已报名未签到</div><div class="v">62</div></div>
+      </div>
+      <h2>最近核验记录</h2>
+      <table>
+        <tr><th>时间</th><th>凭证</th><th>结果</th></tr>
+        <tr><td>19:42:08</td><td class="mono">NJU-7F3K</td><td><span class="badge success">通过</span></td></tr>
+        <tr><td>19:41:55</td><td class="mono">NJU-2M9P</td><td><span class="badge success">通过</span></td></tr>
+        <tr><td>19:41:30</td><td class="mono">NJU-8Q4T</td><td><span class="badge warn">已签到</span></td></tr>
+        <tr><td>19:40:58</td><td class="mono">NJU-5C7X</td><td><span class="badge danger">非本场次</span></td></tr>
+        <tr><td>19:40:12</td><td class="mono">NJU-1A6B</td><td><span class="badge success">通过</span></td></tr>
+      </table>
+    </section>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>我的报名与凭证 - 票集</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">票集<small>活动票务与报名系统</small></div>
+  <nav class="nav">
+    <a href="#">活动发现</a>
+    <a class="active" href="#">我的报名</a>
+    <a href="#">我的凭证</a>
+  </nav>
+  <div class="spacer"></div>
+  <div class="userchip">
+    <div class="avatar">陆</div>
+    <div><div class="name">陆知渔</div><div class="role">参与者</div></div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="page-head">
+    <div>
+      <h1>我的报名与凭证</h1>
+      <div class="sub">仅显示本人的报名记录；状态变化后凭证与名额同步更新</div>
+    </div>
+    <div class="count">最近更新 18:42</div>
+  </div>
+
+  <section class="stats">
+    <div class="stat accent"><div class="k">有效报名</div><div class="v">2</div></div>
+    <div class="stat warn"><div class="k">候补中</div><div class="v">1</div></div>
+    <div class="stat ok"><div class="k">已签到</div><div class="v">1</div></div>
+    <div class="stat"><div class="k">已取消</div><div class="v">1</div></div>
+  </section>
+
+  <div class="detail-grid">
+    <section class="panel" style="padding:0;overflow:hidden">
+      <div style="padding:16px 18px 6px"><h2 style="margin-bottom:2px">报名记录</h2><div class="hint">按报名时间倒序排列</div></div>
+      <table>
+        <tr><th>活动 / 场次</th><th>票种</th><th>状态</th><th>操作</th></tr>
+        <tr>
+          <td><b>城市音乐节</b><div class="small">周五夜场 · 11 月 15 日 19:30</div></td>
+          <td>普通票</td>
+          <td><span class="badge success">已报名</span></td>
+          <td><button class="btn btn-ghost btn-sm">取消报名</button></td>
+        </tr>
+        <tr>
+          <td><b>校园歌手大赛</b><div class="small">决赛 · 11 月 9 日 18:30</div></td>
+          <td>普通票</td>
+          <td><span class="badge warn">候补中 · 第 2 位</span></td>
+          <td><button class="btn btn-ghost btn-sm">退出候补</button></td>
+        </tr>
+        <tr>
+          <td><b>开源技术沙龙</b><div class="small">下午场 · 11 月 20 日 14:00</div></td>
+          <td>普通票</td>
+          <td><span class="badge info">已签到</span></td>
+          <td><span class="hint">18:57 已核验</span></td>
+        </tr>
+        <tr>
+          <td><b>城市摄影展</b><div class="small">首日场 · 11 月 10 日 10:00</div></td>
+          <td>普通票</td>
+          <td><span class="badge">已取消</span></td>
+          <td><span class="hint">已释放名额</span></td>
+        </tr>
+        <tr>
+          <td><b>城市徒步</b><div class="small">上午场 · 11 月 23 日 08:00</div></td>
+          <td>普通票</td>
+          <td><span class="badge success">已报名</span></td>
+          <td><button class="btn btn-ghost btn-sm">取消报名</button></td>
+        </tr>
+      </table>
+    </section>
+
+    <aside class="panel">
+      <div class="small">入场凭证</div>
+      <div style="font-weight:700;font-size:16px;margin:5px 0 12px">城市音乐节 · 周五夜场</div>
+      <div class="code"><span>NJU-7F3K-92QX</span><button class="btn btn-ghost btn-sm">复制</button></div>
+      <dl class="kv" style="margin-top:14px">
+        <dt>持票人</dt><dd>陆知渔</dd>
+        <dt>票种</dt><dd>普通票</dd>
+        <dt>场次</dt><dd>11 月 15 日 19:30</dd>
+        <dt>凭证状态</dt><dd><span class="badge success">有效</span></dd>
+      </dl>
+      <div class="notice">凭证仅在对应场次有效；核验通过后状态变为“已签到”，不可再取消报名。</div>
+      <div class="hint">签到时间与检票人员会写入操作日志。已签到记录不会因活动取消而回退（REQ-018）。</div>
+      <button class="btn btn-primary" style="width:100%;margin-top:14px">出示凭证</button>
+    </aside>
+  </div>
+</main>
+</body>
+</html>

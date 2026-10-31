@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>名单与统计 - 票集</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">票集<small>活动票务与报名系统</small></div>
+  <nav class="nav">
+    <a class="active" href="#">组织者工作台</a>
+    <a href="#">消息通知</a>
+  </nav>
+  <div class="spacer"></div>
+  <div class="userchip">
+    <div class="avatar" style="background:#ecfdf5;color:#059669">张</div>
+    <div><div class="name">张科杰</div><div class="role">组织者</div></div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="section">活动</div>
+    <a href="#">我的活动</a>
+    <a href="#">场次与票种</a>
+    <a href="#">审核进度</a>
+    <div class="section">数据</div>
+    <a href="#">报名名单</a>
+    <a class="active" href="#">统计与导出</a>
+    <div class="section">其他</div>
+    <a href="#">通知记录</a>
+  </aside>
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>报名名单与统计</h1>
+        <div class="sub">城市音乐节 · 周五夜场 · 容量 500</div>
+      </div>
+      <div class="toolbar" style="margin:0">
+        <select class="input" style="height:38px"><option>周五夜场</option><option>周六午场</option></select>
+        <button class="btn btn-primary" style="height:38px">导出 CSV</button>
+      </div>
+    </div>
+
+    <section class="stats">
+      <div class="stat accent"><div class="k">已报名</div><div class="v">410</div></div>
+      <div class="stat warn"><div class="k">候补中</div><div class="v">12</div></div>
+      <div class="stat"><div class="k">剩余名额</div><div class="v">90</div></div>
+      <div class="stat ok"><div class="k">签到率</div><div class="v">86.4<small>%</small></div></div>
+    </section>
+    <div class="hint" style="margin:-8px 0 16px">签到率 = 已签到人数 ÷（已签到人数 + 缺席人数）；两者均为 0 时显示“暂无数据”。</div>
+
+    <div class="toolbar">
+      <select class="input" style="height:36px"><option>全部票种</option><option>普通票</option><option>无障碍票</option></select>
+      <select class="input" style="height:36px"><option>全部状态</option><option>已报名</option><option>已签到</option><option>缺席</option><option>已取消</option></select>
+      <input class="input" style="height:36px;width:210px" placeholder="搜索姓名或账号">
+      <div class="spacer"></div>
+      <span class="count">共 410 条 · 第 1 / 21 页</span>
+    </div>
+
+    <div class="panel" style="padding:0;overflow:hidden">
+      <table>
+        <tr><th>姓名</th><th>账号</th><th>票种</th><th>报名时间</th><th>状态</th><th>签到时间</th></tr>
+        <tr><td>陆知渔</td><td class="mono">241880173</td><td>普通票</td><td>11-01 10:02</td><td><span class="badge info">已签到</span></td><td>19:42</td></tr>
+        <tr><td>石祖屹</td><td class="mono">241880216</td><td>普通票</td><td>11-01 10:05</td><td><span class="badge success">已报名</span></td><td>—</td></tr>
+        <tr><td>刘姝俐</td><td class="mono">221220064</td><td>无障碍票</td><td>11-01 10:11</td><td><span class="badge success">已报名</span></td><td>—</td></tr>
+        <tr><td>成华睿</td><td class="mono">221850073</td><td>普通票</td><td>11-01 10:18</td><td><span class="badge">已取消</span></td><td>—</td></tr>
+        <tr><td>张辰曦</td><td class="mono">241880241</td><td>普通票</td><td>11-01 10:24</td><td><span class="badge danger">缺席</span></td><td>—</td></tr>
+        <tr><td>张科杰</td><td class="mono">241880102</td><td>普通票</td><td>11-01 10:31</td><td><span class="badge success">已报名</span></td><td>—</td></tr>
+      </table>
+      <div class="pagination"><span>上一页</span><span class="current">1</span><span>2</span><span>3</span><span>下一页</span></div>
+    </div>
+
+    <div class="footer-note">导出中断或读取失败时返回失败结果并记录日志，不会把不完整的 CSV 标为成功（REQ-023）。</div>
+  </main>
+</div>
+</body>
+</html>

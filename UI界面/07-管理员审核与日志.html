@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>平台管理 - 票集</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">票集<small>活动票务与报名系统</small></div>
+  <nav class="nav">
+    <a class="active" href="#">平台管理</a>
+    <a href="#">消息通知</a>
+  </nav>
+  <div class="spacer"></div>
+  <div class="userchip">
+    <div class="avatar" style="background:#eff6ff;color:#2563eb">管</div>
+    <div><div class="name">平台管理员</div><div class="role">平台管理员</div></div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="section">管理</div>
+    <a class="active" href="#">活动审核</a>
+    <a href="#">操作日志</a>
+    <a href="#">平台汇总</a>
+    <div class="section">账号</div>
+    <a href="#">角色与权限</a>
+  </aside>
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>平台管理</h1>
+        <div class="sub">审核活动、取消违规活动并追溯关键操作</div>
+      </div>
+      <input class="input" style="width:240px;height:38px" placeholder="搜索活动、组织者或操作人">
+    </div>
+
+    <section class="stats">
+      <div class="stat warn"><div class="k">待审核活动</div><div class="v">3</div></div>
+      <div class="stat accent"><div class="k">已发布活动</div><div class="v">18</div></div>
+      <div class="stat ok"><div class="k">今日报名</div><div class="v">264</div></div>
+      <div class="stat danger"><div class="k">失败操作</div><div class="v">1</div></div>
+    </section>
+
+    <div class="split">
+      <section class="panel">
+        <div class="list-item" style="padding-top:0">
+          <div class="title-line">
+            <b>校园歌手大赛</b>
+            <span class="badge warn">待审核</span>
+          </div>
+          <div class="desc">组织者：张科杰 · 提交于 10-31 16:20<br>场次：决赛 11-09 18:30 · 普通票 300 张</div>
+          <div class="actions">
+            <button class="btn btn-primary btn-sm">通过并发布</button>
+            <button class="btn btn-ghost btn-sm">驳回</button>
+            <button class="btn btn-ghost btn-sm">查看详情</button>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="title-line">
+            <b>公益市集</b>
+            <span class="badge warn">待审核</span>
+          </div>
+          <div class="desc">组织者：石祖屹 · 提交于 10-31 14:07<br>场次：11-30 09:00 · 免费票 200 张</div>
+          <div class="actions">
+            <button class="btn btn-primary btn-sm">通过并发布</button>
+            <button class="btn btn-ghost btn-sm">驳回</button>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="title-line">
+            <b>校园夜跑</b>
+            <span class="badge warn">待审核</span>
+          </div>
+          <div class="desc">组织者：刘姝俐 · 提交于 10-30 20:31<br>场次：11-12 20:00 · 普通票 150 张</div>
+          <div class="actions">
+            <button class="btn btn-primary btn-sm">通过并发布</button>
+            <button class="btn btn-ghost btn-sm">驳回</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="toolbar" style="margin-bottom:10px">
+          <h2 style="margin:0">操作日志</h2>
+          <div class="spacer"></div>
+          <select class="input" style="height:32px"><option>全部结果</option><option>成功</option><option>失败</option></select>
+        </div>
+        <table>
+          <tr><th>时间</th><th>操作</th><th>结果</th></tr>
+          <tr><td>16:31</td><td>审核活动 · 校园歌手大赛<br><span class="small">操作人：平台管理员</span></td><td><span class="badge success">成功</span></td></tr>
+          <tr><td>16:12</td><td>导出名单 · 城市音乐节<br><span class="small">操作人：张科杰</span></td><td><span class="badge danger">失败</span></td></tr>
+          <tr><td>15:48</td><td>取消活动 · 露天电影夜<br><span class="small">操作人：平台管理员</span></td><td><span class="badge success">成功</span></td></tr>
+          <tr><td>15:02</td><td>报名 · 校园歌手大赛<br><span class="small">操作人：陆知渔</span></td><td><span class="badge success">成功</span></td></tr>
+          <tr><td>14:51</td><td>核验签到 · 开源技术沙龙<br><span class="small">操作人：周检票</span></td><td><span class="badge success">成功</span></td></tr>
+        </table>
+        <div class="footer-note">失败操作同样保留日志；日志含人员、时间、对象与结果（REQ-025）。</div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>
