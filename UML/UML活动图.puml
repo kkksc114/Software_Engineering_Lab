@@ -1,0 +1,14 @@
+@startuml
+skinparam defaultFontName "Noto Sans CJK SC"
+
+start
+:用户登录;
+:浏览活动列表;
+:打开活动详情;
+:选择场次和票种;
+:填写报名信息;
+:提交报名;
+:系统保存报名记录;
+:显示报名成功;
+stop
+@enduml

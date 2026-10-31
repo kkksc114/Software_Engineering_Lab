@@ -1,0 +1,27 @@
+@startuml
+skinparam defaultFontName "Noto Sans CJK SC"
+skinparam componentStyle rectangle
+
+package "前端" {
+  [活动列表页]
+  [报名页]
+  [组织者后台]
+}
+
+package "后端服务" {
+  [活动服务]
+  [报名服务]
+  [用户服务]
+}
+
+database "数据库" as DB
+
+[活动列表页] --> [活动服务]
+[报名页] --> [报名服务]
+[组织者后台] --> [活动服务]
+[活动服务] --> [用户服务]
+[报名服务] --> [用户服务]
+[活动服务] --> DB
+[报名服务] --> DB
+[用户服务] --> DB
+@enduml

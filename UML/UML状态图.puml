@@ -1,0 +1,11 @@
+@startuml
+skinparam defaultFontName "Noto Sans CJK SC"
+
+[*] --> 已报名 : 提交报名
+已报名 --> 已签到 : 现场核验
+已报名 --> 已取消 : 用户取消
+已取消 --> 已报名 : 重新报名
+已签到 --> 已取消 : 取消报名
+已签到 --> [*]
+已取消 --> [*]
+@enduml

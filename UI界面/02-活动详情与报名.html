@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>活动详情 - 票集</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">票集<small>活动票务与报名系统</small></div>
+  <nav class="nav">
+    <a class="active" href="#">活动发现</a>
+    <a href="#">我的报名</a>
+    <a href="#">我的凭证</a>
+  </nav>
+  <div class="spacer"></div>
+  <div class="userchip">
+    <div class="avatar">陆</div>
+    <div><div class="name">陆知渔</div><div class="role">参与者</div></div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="small" style="margin-bottom:14px">活动发现 / 演出 / 城市音乐节</div>
+
+  <div class="detail-grid">
+    <div>
+      <div class="panel">
+        <span class="tag">演出</span>
+        <h1 style="margin:10px 0 8px">城市音乐节</h1>
+        <div class="meta" style="font-size:13px">
+          11 月 15 日 19:30 · 南京青奥体育公园 · 主办：城市文化中心<br>
+          报名开放：11 月 1 日 10:00 至 11 月 12 日 18:00
+        </div>
+        <p style="margin:14px 0 0;color:#374151">
+          面向全市音乐爱好者，两天演出包含乐队专场与民谣舞台。请按场次选择票种报名，
+          报名成功后可在“我的凭证”中查看入场凭证。
+        </p>
+      </div>
+
+      <div class="panel">
+        <h2>选择场次</h2>
+        <table>
+          <tr><th style="width:44px"></th><th>场次</th><th>时间</th><th>容量</th><th>剩余</th><th>状态</th></tr>
+          <tr>
+            <td><input type="radio" name="session" checked></td>
+            <td>周五夜场</td><td>11 月 15 日 19:30</td><td>300</td><td>64</td>
+            <td><span class="badge success">报名中</span></td>
+          </tr>
+          <tr>
+            <td><input type="radio" name="session"></td>
+            <td>周六午场</td><td>11 月 16 日 14:00</td><td>200</td><td>26</td>
+            <td><span class="badge success">报名中</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2>选择票种</h2>
+        <table>
+          <tr><th style="width:44px"></th><th>票种</th><th>说明</th><th>容量</th><th>剩余</th><th>状态</th></tr>
+          <tr>
+            <td><input type="radio" name="ticket" checked></td>
+            <td>普通票</td><td>自由区入场</td><td>260</td><td>51</td>
+            <td><span class="badge success">可报名</span></td>
+          </tr>
+          <tr>
+            <td><input type="radio" name="ticket"></td>
+            <td>无障碍票</td><td>无障碍观演区</td><td>40</td><td>13</td>
+            <td><span class="badge success">可报名</span></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <aside class="panel booking">
+      <div class="small">当前选择</div>
+      <div style="font-weight:700;font-size:16px;margin:6px 0 12px">周五夜场 · 普通票</div>
+      <div class="row"><span>场次时间</span><b>11 月 15 日 19:30</b></div>
+      <div class="row"><span>剩余名额</span><b>51 / 260</b></div>
+      <div class="row"><span>报名截止</span><b>11 月 12 日 18:00</b></div>
+      <div class="notice">名额在提交时由服务端重新校验；若已被占满，可选择加入候补。</div>
+      <button class="btn btn-primary" style="width:100%">立即报名</button>
+      <button class="btn btn-ghost" style="width:100%;margin-top:10px">加入候补</button>
+      <div class="small" style="margin-top:12px">同一场次只能有一条有效报名；重复提交将返回首次处理结果。</div>
+    </aside>
+  </div>
+</main>
+</body>
+</html>

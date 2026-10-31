@@ -1,0 +1,72 @@
+@startuml
+skinparam defaultFontName "Noto Sans CJK SC"
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+hide empty members
+
+package "用户管理" {
+  class User {
+    - id: Long
+    - account: String
+    - password: String
+    - role: String
+  }
+  class UserService {
+    + login(account: String, password: String): User
+    + register(account: String, password: String): User
+  }
+}
+
+package "活动管理" {
+  class Event {
+    - id: Long
+    - title: String
+    - city: String
+    - category: String
+    - state: String
+  }
+  class EventSession {
+    - id: Long
+    - startTime: LocalDateTime
+    - endTime: LocalDateTime
+  }
+  class TicketType {
+    - id: Long
+    - name: String
+    - capacity: int
+    - occupied: int
+  }
+  class EventService {
+    + createEvent(event: Event): Long
+    + addSession(eventId: Long, session: EventSession): Long
+    + addTicketType(sessionId: Long, ticket: TicketType): Long
+  }
+}
+
+package "报名管理" {
+  class Registration {
+    - id: Long
+    - status: String
+    - checkedIn: boolean
+    - registeredAt: LocalDateTime
+  }
+  class RegistrationService {
+    + register(userId: Long, sessionId: Long, ticketTypeId: Long): Registration
+    + cancel(registrationId: Long): void
+  }
+}
+
+package "界面" {
+  class EventListPage
+  class RegistrationDialog
+}
+
+User "1" -- "0..*" Event : 创建 >
+Event "1" *-- "0..*" EventSession
+EventSession "1" *-- "0..*" TicketType
+TicketType "1" -- "0..*" Registration
+User "1" -- "0..*" Registration
+EventListPage --> EventService
+RegistrationDialog --> RegistrationService
+UserService ..> User
+@enduml

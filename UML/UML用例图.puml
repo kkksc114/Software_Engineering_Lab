@@ -1,0 +1,24 @@
+@startuml
+skinparam defaultFontName "Noto Sans CJK SC"
+left to right direction
+
+actor 参与者 as P
+actor 组织者 as O
+actor 平台管理员 as A
+
+usecase "浏览活动" as UC01
+usecase "报名活动" as UC02
+usecase "取消报名" as UC03
+usecase "创建活动" as UC04
+usecase "提交审核" as UC05
+usecase "审核活动" as UC06
+usecase "发布活动" as UC07
+
+P --> UC01
+P --> UC02
+P --> UC03
+O --> UC04
+O --> UC05
+A --> UC06
+A --> UC07
+@enduml

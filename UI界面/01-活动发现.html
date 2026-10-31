@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>活动发现 - 票集</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">票集<small>活动票务与报名系统</small></div>
+  <nav class="nav">
+    <a class="active" href="#">活动发现</a>
+    <a href="#">我的报名</a>
+    <a href="#">我的凭证</a>
+  </nav>
+  <div class="spacer"></div>
+  <div class="userchip">
+    <div class="avatar">陆</div>
+    <div><div class="name">陆知渔</div><div class="role">参与者</div></div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="page-head">
+    <div>
+      <h1>发现活动</h1>
+      <div class="sub">按关键词、城市、类别和日期组合筛选，结果实时更新</div>
+    </div>
+    <div class="count">共 26 个活动</div>
+  </div>
+
+  <section class="search-card">
+    <div class="field" style="flex:1.4">
+      <label>关键词</label>
+      <input class="input" value="音乐" placeholder="活动名称或关键词">
+    </div>
+    <div class="field">
+      <label>城市</label>
+      <select><option>南京</option><option>上海</option><option>杭州</option></select>
+    </div>
+    <div class="field">
+      <label>类别</label>
+      <select><option>全部类别</option><option>演出</option><option>讲座</option><option>运动</option></select>
+    </div>
+    <div class="field">
+      <label>时间</label>
+      <select><option>未来 30 天</option><option>本周</option><option>本月</option></select>
+    </div>
+    <button class="btn btn-primary">查询</button>
+    <button class="btn btn-ghost">重置</button>
+  </section>
+
+  <section class="cards">
+    <article class="card">
+      <div class="cover c1">城市音乐节</div>
+      <div class="card-body">
+        <span class="tag">演出</span>
+        <div class="meta">11 月 15 日 19:30 · 南京青奥体育公园<br>报名截止 11 月 12 日 18:00</div>
+        <div class="progress"><i style="width:82%"></i></div>
+        <div class="small">已报名 410 / 500 · 剩余 90</div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="cover c2">校园歌手大赛</div>
+      <div class="card-body">
+        <span class="tag">比赛</span>
+        <div class="meta">11 月 9 日 18:30 · 大学生活动中心<br>报名截止 11 月 6 日 23:59</div>
+        <div class="progress"><i style="width:100%"></i></div>
+        <div class="small">已报名 300 / 300 · 满额，可登记候补</div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="cover c3">开源技术沙龙</div>
+      <div class="card-body">
+        <span class="tag">讲座</span>
+        <div class="meta">11 月 20 日 14:00 · 图书馆报告厅<br>报名截止 11 月 19 日 12:00</div>
+        <div class="progress"><i style="width:46%"></i></div>
+        <div class="small">已报名 92 / 200 · 剩余 108</div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="cover c4">城市徒步</div>
+      <div class="card-body">
+        <span class="tag">运动</span>
+        <div class="meta">11 月 23 日 08:00 · 玄武湖东门<br>报名截止 11 月 21 日 20:00</div>
+        <div class="progress"><i style="width:64%"></i></div>
+        <div class="small">已报名 128 / 200 · 剩余 72</div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="cover c5">城市摄影展</div>
+      <div class="card-body">
+        <span class="tag">展览</span>
+        <div class="meta">11 月 10 日 10:00 · 美术馆 3 号厅<br>报名截止 11 月 9 日 18:00</div>
+        <div class="progress"><i style="width:35%"></i></div>
+        <div class="small">已报名 70 / 200 · 剩余 130</div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="cover c6">公益市集</div>
+      <div class="card-body">
+        <span class="tag">公益</span>
+        <div class="meta">11 月 30 日 09:00 · 市民广场<br>报名截止 11 月 28 日 18:00</div>
+        <div class="progress"><i style="width:58%"></i></div>
+        <div class="small">已报名 116 / 200 · 剩余 84</div>
+      </div>
+    </article>
+  </section>
+</main>
+</body>
+</html>

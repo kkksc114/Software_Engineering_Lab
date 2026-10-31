@@ -1,0 +1,17 @@
+@startuml
+skinparam defaultFontName "Noto Sans CJK SC"
+
+actor 参与者 as P
+participant "报名界面" as UI
+participant "报名服务" as RS
+database "数据库" as DB
+
+P -> UI : 选择场次并提交报名
+UI -> RS : register(userId, sessionId, ticketTypeId)
+RS -> DB : 查询场次剩余名额
+DB --> RS : 剩余名额
+RS -> DB : 写入报名记录
+RS -> DB : 名额减一
+RS --> UI : 返回报名成功
+UI --> P : 显示成功提示
+@enduml

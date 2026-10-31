@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>组织者工作台 - 票集</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">票集<small>活动票务与报名系统</small></div>
+  <nav class="nav">
+    <a class="active" href="#">组织者工作台</a>
+    <a href="#">消息通知</a>
+  </nav>
+  <div class="spacer"></div>
+  <div class="userchip">
+    <div class="avatar" style="background:#ecfdf5;color:#059669">张</div>
+    <div><div class="name">张科杰</div><div class="role">组织者</div></div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="section">活动</div>
+    <a class="active" href="#">我的活动</a>
+    <a href="#">场次与票种</a>
+    <a href="#">审核进度</a>
+    <div class="section">数据</div>
+    <a href="#">报名名单</a>
+    <a href="#">统计与导出</a>
+    <div class="section">其他</div>
+    <a href="#">通知记录</a>
+  </aside>
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>我的活动</h1>
+        <div class="sub">草稿可直接编辑；已发布活动的重要信息修改需要重新审核</div>
+      </div>
+      <button class="btn btn-primary">新建活动</button>
+    </div>
+
+    <div class="toolbar">
+      <span class="badge info">全部 4</span>
+      <span class="badge">草稿 1</span>
+      <span class="badge">待审核 1</span>
+      <span class="badge success">已发布 1</span>
+      <span class="badge danger">已取消 1</span>
+      <div class="spacer"></div>
+      <input class="input" style="width:220px;height:36px" placeholder="搜索活动名称">
+    </div>
+
+    <div class="panel" style="padding:0;overflow:hidden">
+      <table>
+        <tr><th>活动</th><th>最近场次</th><th>状态</th><th>报名 / 容量</th><th>操作</th></tr>
+        <tr>
+          <td><b>城市音乐节</b><div class="small">演出 · 南京</div></td>
+          <td>11 月 15 日 19:30</td>
+          <td><span class="badge success">已发布</span></td>
+          <td>410 / 500</td>
+          <td><button class="btn btn-ghost btn-sm">管理</button></td>
+        </tr>
+        <tr>
+          <td><b>校园歌手大赛</b><div class="small">比赛 · 南京</div></td>
+          <td>11 月 9 日 18:30</td>
+          <td><span class="badge warn">待审核</span></td>
+          <td>—</td>
+          <td><button class="btn btn-ghost btn-sm">查看审核</button></td>
+        </tr>
+        <tr>
+          <td><b>秋季读书会</b><div class="small">讲座 · 南京</div></td>
+          <td>11 月 18 日 15:00</td>
+          <td><span class="badge">草稿</span></td>
+          <td>—</td>
+          <td><button class="btn btn-ghost btn-sm">编辑</button> <button class="btn btn-primary btn-sm">提交审核</button></td>
+        </tr>
+        <tr>
+          <td><b>露天电影夜</b><div class="small">展映 · 南京</div></td>
+          <td>11 月 2 日 19:00</td>
+          <td><span class="badge danger">已取消</span></td>
+          <td>86 / 120</td>
+          <td><button class="btn btn-ghost btn-sm">查看记录</button></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h2>场次与票种 · 城市音乐节</h2>
+      <table>
+        <tr><th>场次</th><th>票种</th><th>容量</th><th>已占用</th><th>剩余</th><th>操作</th></tr>
+        <tr><td>周五夜场</td><td>普通票</td><td>260</td><td>209</td><td>51</td>
+          <td><button class="btn btn-ghost btn-sm">调整容量</button></td></tr>
+        <tr><td>周五夜场</td><td>无障碍票</td><td>40</td><td>27</td><td>13</td>
+          <td><button class="btn btn-ghost btn-sm">调整容量</button></td></tr>
+      </table>
+      <div class="notice">容量不得下调到低于当前已占用名额的数量。</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>
