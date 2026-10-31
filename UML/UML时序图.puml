@@ -1,17 +1,73 @@
 @startuml
 skinparam defaultFontName "Noto Sans CJK SC"
+skinparam sequenceMessageAlign left
+skinparam sequenceFontSize 14
+autonumber
 
 actor 参与者 as P
 participant "报名界面" as UI
 participant "报名服务" as RS
+participant "幂等服务" as IDEM
+participant "截止策略" as DP
+participant "事务管理器" as TX
+participant "场次实体" as SESS
+participant "候补管理器" as WL
+participant "通知服务" as NS
 database "数据库" as DB
 
-P -> UI : 选择场次并提交报名
-UI -> RS : register(userId, sessionId, ticketTypeId)
-RS -> DB : 查询场次剩余名额
-DB --> RS : 剩余名额
-RS -> DB : 写入报名记录
-RS -> DB : 名额减一
-RS --> UI : 返回报名成功
-UI --> P : 显示成功提示
+== 报名 ==
+P -> UI : 选择场次票种并提交
+UI -> RS : register(cmd)
+RS -> IDEM : 查询 requestId
+alt 已存在处理结果
+  IDEM --> RS : 首次结果
+  RS --> UI : 返回首次结果（不重复占用）
+else 首次请求
+  RS -> DP : isOpen(event, ServerClock.now())
+  alt 已截止
+    DP --> RS : false
+    RS --> UI : 拒绝：报名已截止
+  else 开放期内
+    RS -> TX : begin()
+    RS -> SESS : 锁定场次并复查活动状态
+    RS -> SESS : tryOccupy(ticketType)
+    alt 有可用名额
+      SESS --> RS : true
+      RS -> DB : 写入已报名记录与凭证
+      RS -> TX : commit()
+      RS -> NS : 发送报名成功通知
+      RS --> UI : 成功并返回凭证
+    else 无名额
+      SESS --> RS : false
+      RS -> WL : enqueue(分配队列号)
+      RS -> DB : 写入候补记录
+      RS -> TX : commit()
+      RS --> UI : 已登记候补并返回位置
+    end
+  end
+end
+
+== 取消与自动递补 ==
+P -> UI : 取消本人报名
+UI -> RS : cancel(registrationId, actor)
+RS -> TX : begin()
+RS -> DB : 校验归属并置为已取消
+RS -> SESS : release()
+RS -> DP : isOpen(event, ServerClock.now())
+alt 报名截止前
+  RS -> WL : promoteHead(sessionId)
+  WL -> SESS : tryOccupy(ticketType)
+  WL -> DB : 候补→已报名并发放凭证
+  WL -> NS : 通知递补成功
+else 报名截止后
+  RS -> WL : expireAll(sessionId)
+end
+RS -> TX : commit()
+RS --> UI : 取消成功
+
+note over RS, DB
+  任一步失败则整个事务回滚；
+  签到与取消并发时仅一个状态转换成功。
+  通知失败不回滚已生效的报名（REQ-026）。
+end note
 @enduml

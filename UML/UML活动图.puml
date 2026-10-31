@@ -1,14 +1,42 @@
 @startuml
 skinparam defaultFontName "Noto Sans CJK SC"
+skinparam activityFontSize 15
+skinparam shadowing false
 
 start
-:用户登录;
-:浏览活动列表;
-:打开活动详情;
-:选择场次和票种;
-:填写报名信息;
-:提交报名;
-:系统保存报名记录;
-:显示报名成功;
+:参与者查询活动并选择场次、票种;
+:参与者提交报名请求（携带 requestId）;
+:系统校验活动状态与报名截止时间;
+if (活动可报名且未截止?) then (是)
+  :查询 requestId 是否已处理;
+  if (重复请求?) then (是)
+    :返回首次处理结果;
+    stop
+  else (否)
+    :开启事务并锁定场次;
+    if (仍有可用名额?) then (是)
+      :创建已报名记录与凭证;
+      :占用一个名额并提交事务;
+      :发送报名成功通知;
+      :参与者查看凭证，等待入场;
+    else (否)
+      :按队列号登记候补;
+      :提交事务并显示候补位置;
+    endif
+  endif
+else (否)
+  :拒绝并说明原因（已截止/已取消）;
+  stop
+endif
+:检票人员核验报名凭证;
+if (场次已授权且记录为已报名?) then (是)
+  :记录签到并写入审计日志;
+  :放行入场;
+else (否)
+  :提示：无权限/已签到/已取消;
+endif
+:场次结束;
+:系统将未签到的已报名记录标为缺席;
+:组织者查看统计并导出名单;
 stop
 @enduml

@@ -1,11 +1,37 @@
 @startuml
 skinparam defaultFontName "Noto Sans CJK SC"
+skinparam stateFontSize 15
+skinparam shadowing false
 
-[*] --> 已报名 : 提交报名
-已报名 --> 已签到 : 现场核验
-已报名 --> 已取消 : 用户取消
-已取消 --> 已报名 : 重新报名
-已签到 --> 已取消 : 取消报名
-已签到 --> [*]
-已取消 --> [*]
+state "已报名" as Registered
+state "候补中" as Waitlisted
+state "已签到" as CheckedIn
+state "已取消" as Cancelled
+state "缺席" as Absent
+state "活动取消" as EventCancelled
+state "候补失效" as Expired
+
+[*] --> Registered : 报名成功 / 占用名额
+[*] --> Waitlisted : 满额登记候补 / 不占名额
+Waitlisted --> Registered : 报名截止前递补 / 发放凭证
+Waitlisted --> Expired : 报名截止 / 队列停止
+Registered --> CheckedIn : 核验通过 / 唯一签到
+Registered --> Cancelled : 取消报名 / 释放名额
+Registered --> Absent : 场次结束未签到
+Registered --> EventCancelled : 活动取消 / 未签到记录
+CheckedIn --> [*]
+Cancelled --> [*]
+Absent --> [*]
+Expired --> [*]
+EventCancelled --> [*]
+
+note right of CheckedIn
+  已签到记录不因活动取消
+  回退，历史与日志保留（REQ-018）。
+end note
+note bottom of Cancelled
+  禁止：候补中→已签到、
+  已取消→已签到、已签到→已取消。
+  截止后取消不触发递补（REQ-011/015）。
+end note
 @enduml

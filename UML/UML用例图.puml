@@ -1,24 +1,69 @@
 @startuml
 skinparam defaultFontName "Noto Sans CJK SC"
+skinparam usecaseFontSize 14
+skinparam actorFontSize 15
 left to right direction
 
 actor 参与者 as P
 actor 组织者 as O
+actor 检票人员 as C
 actor 平台管理员 as A
+actor 定时任务 as S <<系统>>
 
-usecase "浏览活动" as UC01
-usecase "报名活动" as UC02
-usecase "取消报名" as UC03
-usecase "创建活动" as UC04
-usecase "提交审核" as UC05
-usecase "审核活动" as UC06
-usecase "发布活动" as UC07
+rectangle "活动票务与报名系统" {
+  package "浏览与报名" {
+    usecase "查询活动" as UC01
+    usecase "提交报名" as UC02
+    usecase "登记候补" as UC03
+    usecase "取消报名" as UC04
+    usecase "查看本人凭证" as UC05
+    usecase "校验报名资格\n（开放期/名额/幂等）" as UC06
+  }
+  package "活动管理" {
+    usecase "维护活动、场次与票种" as UC07
+    usecase "提交审核" as UC08
+    usecase "审核活动" as UC09
+    usecase "取消违规活动" as UC10
+  }
+  package "检票与统计" {
+    usecase "核验签到" as UC11
+    usecase "校验场次授权" as UC12
+    usecase "查看名单与统计" as UC13
+    usecase "导出 CSV 名单" as UC14
+  }
+  package "通知与审计" {
+    usecase "查看平台汇总" as UC15
+    usecase "查询操作日志" as UC16
+    usecase "自动递补" as UC17
+    usecase "候补失效" as UC18
+    usecase "标记缺席" as UC19
+    usecase "记录审计日志" as UC20
+  }
+}
 
 P --> UC01
 P --> UC02
 P --> UC03
-O --> UC04
-O --> UC05
-A --> UC06
-A --> UC07
+P --> UC04
+P --> UC05
+O --> UC07
+O --> UC08
+O --> UC13
+O --> UC14
+C --> UC11
+A --> UC09
+A --> UC10
+A --> UC15
+A --> UC16
+S --> UC17
+S --> UC18
+S --> UC19
+
+UC02 ..> UC06 : <<include>>
+UC03 ..> UC06 : <<include>>
+UC11 ..> UC12 : <<include>>
+UC14 ..> UC20 : <<include>>
+UC09 ..> UC20
+UC10 ..> UC20
+UC17 .> UC04 : <<extend>>\n（截止前且有候补）
 @enduml
