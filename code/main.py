@@ -1,216 +1,288 @@
-"""Activity ticketing and registration prototype.
+"""Command line entry point for the ticketing system."""
 
-AI first draft: everything is kept in memory and only the happy path works.
-"""
+import os
+import sys
+from datetime import datetime
 
-import random
-import string
+import auth
+import db
+import events
+from models import (
+    EVENT_REJECTED,
+    ROLE_ADMIN,
+    ROLE_CHECKER,
+    ROLE_ORGANIZER,
+    ROLE_PARTICIPANT,
+    ServiceError,
+)
 
-ACCOUNTS = {
-    "participant1": ("123456", "参与者"),
-    "organizer1": ("123456", "组织者"),
-    "checker1": ("123456", "检票人员"),
-    "admin1": ("123456", "平台管理员"),
+DB_PATH = os.environ.get(
+    "TICKET_DB", os.path.join(os.path.dirname(__file__), "..", "data", "ticket.db")
+)
+
+
+def ask(prompt):
+    """Read one non-empty line from the terminal."""
+    value = input(prompt).strip()
+    return value
+
+
+def ask_int(prompt):
+    """Read an integer with a friendly retry loop."""
+    while True:
+        value = ask(prompt)
+        try:
+            return int(value)
+        except ValueError:
+            print("请输入整数")
+
+
+def ask_time(prompt):
+    """Read a timestamp in YYYY-MM-DD HH:MM format."""
+    while True:
+        value = ask(prompt)
+        try:
+            return datetime.strptime(value, "%Y-%m-%d %H:%M").strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+        except ValueError:
+            print("格式应为 YYYY-MM-DD HH:MM")
+
+
+def show_event(conn, event):
+    """Print one event with sessions, tickets and remaining seats."""
+    print(f"\n[{event['id']}] {event['title']}  {event['city']} / {event['category']}")
+    print(f"状态：{event['state']}  报名截止：{event['deadline']}")
+    for session in events.list_sessions(conn, event["id"]):
+        occupied = events.session_occupied(conn, session["id"])
+        print(f"  场次 {session['id']}：{session['title']}  "
+              f"{session['start_time']} - {session['end_time']}  "
+              f"容量 {session['capacity']} 已占 {occupied}")
+        for ticket in events.list_tickets(conn, session["id"]):
+            used = events.ticket_occupied(conn, ticket["id"])
+            print(f"    票种 {ticket['id']}：{ticket['name']}  "
+                  f"容量 {ticket['capacity']} 已占 {used}")
+
+
+def browse_events(conn):
+    """Search published events."""
+    keyword = ask("关键词（可空）：")
+    city = ask("城市（可空）：")
+    category = ask("类别（可空）：")
+    rows = events.search_events(conn, keyword, city, category)
+    if not rows:
+        print("没有符合条件的活动")
+        return
+    for event in rows:
+        print(f"[{event['id']}] {event['title']}  {event['city']}  "
+              f"{event['category']}  截止 {event['deadline']}")
+
+
+def view_event(conn):
+    """Show the detail of one event."""
+    event_id = ask_int("活动编号：")
+    show_event(conn, events.get_event(conn, event_id))
+
+
+def my_events(conn, user):
+    """List events created by the current organizer."""
+    rows = conn.execute(
+        "SELECT * FROM events WHERE organizer_id = ? ORDER BY id DESC", (user["id"],)
+    ).fetchall()
+    if not rows:
+        print("还没有创建活动")
+        return
+    for event in rows:
+        print(f"[{event['id']}] {event['title']}  状态：{event['state']}")
+
+
+def create_event(conn, user):
+    """Interactive wizard for a new event."""
+    title = ask("活动名称：")
+    city = ask("城市：")
+    category = ask("类别：")
+    deadline = ask_time("报名截止（YYYY-MM-DD HH:MM）：")
+    session_title = ask("场次名称：")
+    start = ask_time("场次开始（YYYY-MM-DD HH:MM）：")
+    end = ask_time("场次结束（YYYY-MM-DD HH:MM）：")
+    capacity = ask_int("名额：")
+    event_id = events.create_event(
+        conn, user, title, city, category, deadline,
+        session_title, start, end, capacity
+    )
+    print("活动已创建，编号", event_id, "，当前为草稿")
+
+
+def submit_review(conn, user):
+    """Submit one of the organizer's events for review."""
+    my_events(conn, user)
+    event_id = ask_int("要提交审核的活动编号：")
+    events.submit_review(conn, user, event_id)
+    print("已提交审核")
+
+
+def add_session(conn, user):
+    """Add a session to an editable event."""
+    my_events(conn, user)
+    event_id = ask_int("活动编号：")
+    title = ask("场次名称：")
+    start = ask_time("开始（YYYY-MM-DD HH:MM）：")
+    end = ask_time("结束（YYYY-MM-DD HH:MM）：")
+    capacity = ask_int("名额：")
+    events.add_session(conn, user, event_id, title, start, end, capacity)
+    print("场次已添加")
+
+
+def add_ticket(conn, user):
+    """Add a ticket type to a session."""
+    session_id = ask_int("场次编号：")
+    name = ask("票种名称：")
+    capacity = ask_int("名额：")
+    events.add_ticket(conn, user, session_id, name, capacity)
+    print("票种已添加")
+
+
+def adjust_capacity(conn, user):
+    """Change a ticket capacity."""
+    ticket_id = ask_int("票种编号：")
+    capacity = ask_int("新容量：")
+    events.adjust_ticket_capacity(conn, user, ticket_id, capacity)
+    print("容量已调整")
+
+
+def cancel_event(conn, user):
+    """Cancel an event."""
+    event_id = ask_int("要取消的活动编号：")
+    events.cancel_event(conn, user, event_id)
+    print("活动已取消")
+
+
+def pending_events(conn):
+    """List events waiting for review."""
+    rows = conn.execute(
+        "SELECT * FROM events WHERE state = '待审核' ORDER BY id"
+    ).fetchall()
+    if not rows:
+        print("没有待审核活动")
+        return
+    for event in rows:
+        print(f"[{event['id']}] {event['title']}  组织者 {event['organizer_id']}")
+
+
+def review_event(conn, user):
+    """Approve or reject a pending event."""
+    pending_events(conn)
+    event_id = ask_int("活动编号：")
+    choice = ask("1 通过  2 驳回：")
+    events.review_event(conn, user, event_id, choice == "1")
+    print("审核完成")
+
+
+def participant_menu(conn, user):
+    """Participant menu."""
+    while True:
+        print("\n1 查询活动  2 活动详情  0 退出")
+        choice = ask("请选择：")
+        if choice == "1":
+            browse_events(conn)
+        elif choice == "2":
+            view_event(conn)
+        elif choice == "0":
+            return
+
+
+def organizer_menu(conn, user):
+    """Organizer menu."""
+    while True:
+        print("\n1 我的活动  2 创建活动  3 提交审核  4 新增场次  5 新增票种"
+              "  6 调整名额  7 取消活动  0 退出")
+        choice = ask("请选择：")
+        try:
+            if choice == "1":
+                my_events(conn, user)
+            elif choice == "2":
+                create_event(conn, user)
+            elif choice == "3":
+                submit_review(conn, user)
+            elif choice == "4":
+                add_session(conn, user)
+            elif choice == "5":
+                add_ticket(conn, user)
+            elif choice == "6":
+                adjust_capacity(conn, user)
+            elif choice == "7":
+                cancel_event(conn, user)
+            elif choice == "0":
+                return
+        except ServiceError as exc:
+            print("操作失败：", exc)
+
+
+def checker_menu(conn, user):
+    """Checker menu placeholder until the check-in service lands."""
+    print("检票功能将在下一阶段实现")
+    return
+
+
+def admin_menu(conn, user):
+    """Administrator menu."""
+    while True:
+        print("\n1 待审核活动  2 审核活动  3 取消活动  0 退出")
+        choice = ask("请选择：")
+        try:
+            if choice == "1":
+                pending_events(conn)
+            elif choice == "2":
+                review_event(conn, user)
+            elif choice == "3":
+                cancel_event(conn, user)
+            elif choice == "0":
+                return
+        except ServiceError as exc:
+            print("操作失败：", exc)
+
+
+MENUS = {
+    ROLE_PARTICIPANT: participant_menu,
+    ROLE_ORGANIZER: organizer_menu,
+    ROLE_CHECKER: checker_menu,
+    ROLE_ADMIN: admin_menu,
 }
 
-EVENTS = []
-REGISTRATIONS = []
 
-
-def make_code():
-    """Return a random six-character credential code."""
-    return "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
-
-
-def login():
-    """Ask for an account and return the matching user tuple."""
-    account = input("账号：").strip()
-    password = input("密码：").strip()
-    if account not in ACCOUNTS or ACCOUNTS[account][0] != password:
-        print("账号或密码错误")
-        return None
-    return account, ACCOUNTS[account][1]
-
-
-def find_event(event_id):
-    """Find an event by id."""
-    for event in EVENTS:
-        if event["id"] == event_id:
-            return event
-    return None
-
-
-def create_event(account):
-    """Create a published event with one session and one ticket type."""
-    title = input("活动名称：").strip()
-    city = input("城市：").strip()
-    capacity = int(input("名额：").strip())
-    event = {
-        "id": len(EVENTS) + 1,
-        "title": title,
-        "city": city,
-        "organizer": account,
-        "state": "已发布",
-        "sessions": [
-            {
-                "id": len(EVENTS) * 10 + 1,
-                "title": "默认场次",
-                "capacity": capacity,
-                "tickets": [{"id": 1, "name": "普通票", "capacity": capacity}],
-            }
-        ],
-    }
-    EVENTS.append(event)
-    print("活动已创建，编号", event["id"])
-
-
-def show_events():
-    """Print all published events."""
-    for event in EVENTS:
-        if event["state"] == "已发布":
-            print(f"[{event['id']}] {event['title']}  {event['city']}")
-
-
-def count_registered(session_id):
-    """Count registrations that still occupy a seat."""
-    total = 0
-    for item in REGISTRATIONS:
-        if item["session_id"] == session_id and item["state"] == "已报名":
-            total += 1
-    return total
-
-
-def register(account):
-    """Register the current user for a session."""
-    show_events()
-    event_id = int(input("活动编号：").strip())
-    event = find_event(event_id)
-    if event is None:
-        print("活动不存在")
-        return
-    session = event["sessions"][0]
-    if count_registered(session["id"]) >= session["capacity"]:
-        print("名额已满")
-        return
-    for item in REGISTRATIONS:
-        if item["user"] == account and item["session_id"] == session["id"]:
-            print("已经报名过该场次")
-            return
-    code = make_code()
-    REGISTRATIONS.append(
-        {
-            "user": account,
-            "event_id": event_id,
-            "session_id": session["id"],
-            "state": "已报名",
-            "code": code,
-        }
-    )
-    print("报名成功，凭证码：", code)
-
-
-def my_registrations(account):
-    """Print the current user's registrations."""
-    for item in REGISTRATIONS:
-        if item["user"] == account:
-            event = find_event(item["event_id"])
-            print(f"{event['title']}  {item['state']}  凭证 {item['code']}")
-
-
-def cancel(account):
-    """Cancel one of the current user's registrations."""
-    my_registrations(account)
-    code = input("要取消的凭证码：").strip()
-    for item in REGISTRATIONS:
-        if item["code"] == code and item["user"] == account:
-            item["state"] = "已取消"
-            print("已取消")
-            return
-    print("没有找到该报名")
-
-
-def check_in():
-    """Check in a registration by credential code."""
-    code = input("凭证码：").strip()
-    for item in REGISTRATIONS:
-        if item["code"] == code:
-            if item["state"] == "已签到":
-                print("已签到")
-            else:
-                item["state"] = "已签到"
-                print("签到成功")
-            return
-    print("凭证无效")
-
-
-def participant_menu(account):
-    """Menu for participants."""
+def login_loop(conn):
+    """Ask for credentials until the user quits."""
     while True:
-        print("\n1 查看活动  2 报名  3 我的报名  4 取消报名  0 退出")
-        choice = input("请选择：").strip()
-        if choice == "1":
-            show_events()
-        elif choice == "2":
-            register(account)
-        elif choice == "3":
-            my_registrations(account)
-        elif choice == "4":
-            cancel(account)
-        elif choice == "0":
-            return
-
-
-def organizer_menu(account):
-    """Menu for organizers."""
-    while True:
-        print("\n1 创建活动  2 查看活动  0 退出")
-        choice = input("请选择：").strip()
-        if choice == "1":
-            create_event(account)
-        elif choice == "2":
-            show_events()
-        elif choice == "0":
-            return
-
-
-def checker_menu():
-    """Menu for checkers."""
-    while True:
-        print("\n1 核验凭证  0 退出")
-        choice = input("请选择：").strip()
-        if choice == "1":
-            check_in()
-        elif choice == "0":
-            return
-
-
-def admin_menu():
-    """Menu for platform administrators."""
-    while True:
-        print("\n1 查看活动  0 退出")
-        choice = input("请选择：").strip()
-        if choice == "1":
-            show_events()
-        elif choice == "0":
-            return
+        print("\n活动票务与报名系统")
+        print("演示账号：participant1 / organizer1 / checker1 / admin1，密码均为 123456")
+        account = ask("账号（直接回车退出）：")
+        if not account:
+            return False
+        password = ask("密码：")
+        try:
+            user = auth.login(conn, account, password)
+        except ServiceError as exc:
+            print("登录失败：", exc)
+            continue
+        print(f"欢迎，{user['display_name']}（{user['role']}）")
+        MENUS[user["role"]](conn, user)
+        return True
 
 
 def main():
-    """Run the command line prototype."""
-    print("活动票务与报名系统（AI 初稿）")
-    user = login()
-    if user is None:
-        return
-    account, role = user
-    if role == "参与者":
-        participant_menu(account)
-    elif role == "组织者":
-        organizer_menu(account)
-    elif role == "检票人员":
-        checker_menu()
-    else:
-        admin_menu()
+    """Initialize the database and start the login loop."""
+    db_file = os.path.abspath(DB_PATH)
+    os.makedirs(os.path.dirname(db_file), exist_ok=True)
+    conn = db.connect(db_file)
+    db.init_db(conn)
+    events.expire_waitlists(conn)
+    events.finish_due_sessions(conn)
+    try:
+        login_loop(conn)
+    finally:
+        conn.close()
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
