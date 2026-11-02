@@ -165,7 +165,7 @@ def seed_demo(conn):
     admin_id = add_user(conn, "admin1", "平台管理员", "123456", ROLE_ADMIN)
     organizer_id = add_user(conn, "organizer1", "城南文化", "123456", ROLE_ORGANIZER)
     checker_id = add_user(conn, "checker1", "检票员小李", "123456", ROLE_CHECKER)
-    add_user(conn, "participant1", "王小满", "123456", ROLE_PARTICIPANT)
+    participant_id = add_user(conn, "participant1", "王小满", "123456", ROLE_PARTICIPANT)
     add_user(conn, "participant2", "陈青", "123456", ROLE_PARTICIPANT)
 
     start = datetime.now() + timedelta(days=5)
@@ -213,6 +213,12 @@ def seed_demo(conn):
             EVENT_DRAFT,
             now_text(),
         ),
+    )
+    conn.execute(
+        "INSERT INTO notifications"
+        " (user_id, registration_id, kind, status, retry_count, created_at)"
+        " VALUES (?, NULL, '报名成功', '失败', 0, ?)",
+        (participant_id, now_text()),
     )
     conn.execute(
         "INSERT INTO operation_logs"

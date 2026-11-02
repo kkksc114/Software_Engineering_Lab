@@ -8,7 +8,9 @@ import auth
 import checkin
 import db
 import events
+import notifications
 import registration
+import reports
 from models import (
     EVENT_REJECTED,
     ROLE_ADMIN,
@@ -253,11 +255,50 @@ def participant_menu(conn, user):
             print("操作失败：", exc)
 
 
+def show_registrations(conn, user):
+    """Print filtered registrations of an owned event."""
+    my_events(conn, user)
+    event_id = ask_int("活动编号：")
+    state = ask("状态筛选（可空）：") or None
+    rows = reports.event_registrations(conn, user, event_id, state)
+    if not rows:
+        print("没有符合条件的报名")
+        return
+    for row in rows:
+        print(f"[{row['id']}] {row['account']} {row['display_name']}"
+              f"  {row['session_title']} / {row['ticket_name']}"
+              f"  状态：{row['state']}  凭证：{row['code'] or '-'}")
+
+
+def show_stats(conn, user):
+    """Print capacity and attendance statistics."""
+    my_events(conn, user)
+    event_id = ask_int("活动编号：")
+    rows = reports.event_stats(conn, user, event_id)
+    for row in rows:
+        print(f"{row['session']} / {row['ticket']}：容量 {row['capacity']}"
+              f"  已报名 {row['registered']}  候补 {row['waiting']}"
+              f"  剩余 {row['remaining']}  签到 {row['checked']}"
+              f"  缺席 {row['absent']}  签到率 {row['rate']}")
+
+
+def do_export(conn, user):
+    """Export an event registration list to CSV."""
+    my_events(conn, user)
+    event_id = ask_int("活动编号：")
+    default = os.path.join(os.path.dirname(__file__), "..", "exports",
+                           f"event_{event_id}.csv")
+    path = ask(f"导出路径（默认 {default}）：") or default
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    count = reports.export_csv(conn, user, event_id, path)
+    print(f"已导出 {count} 条记录到 {path}")
+
+
 def organizer_menu(conn, user):
     """Organizer menu."""
     while True:
         print("\n1 我的活动  2 创建活动  3 提交审核  4 新增场次  5 新增票种"
-              "  6 调整名额  7 取消活动  0 退出")
+              "  6 调整名额  7 取消活动  8 报名名单  9 统计  10 导出 CSV  0 退出")
         choice = ask("请选择：")
         try:
             if choice == "1":
@@ -274,6 +315,12 @@ def organizer_menu(conn, user):
                 adjust_capacity(conn, user)
             elif choice == "7":
                 cancel_event(conn, user)
+            elif choice == "8":
+                show_registrations(conn, user)
+            elif choice == "9":
+                show_stats(conn, user)
+            elif choice == "10":
+                do_export(conn, user)
             elif choice == "0":
                 return
         except ServiceError as exc:
@@ -313,10 +360,42 @@ def checker_menu(conn, user):
             print("操作失败：", exc)
 
 
+def show_summary(conn, user):
+    """Print the platform summary."""
+    events_by_state, regs_by_state, users_by_role, checkins = (
+        reports.platform_summary(conn, user)
+    )
+    print("活动状态：", ", ".join(f"{r['state']} {r['total']}" for r in events_by_state))
+    print("报名状态：", ", ".join(f"{r['state']} {r['total']}" for r in regs_by_state))
+    print("用户角色：", ", ".join(f"{r['role']} {r['total']}" for r in users_by_role))
+    print("成功签到次数：", checkins)
+
+
+def show_logs(conn, user):
+    """Print recent operation logs."""
+    action = ask("操作类型筛选（可空）：")
+    rows = reports.query_logs(conn, user, action)
+    for row in rows:
+        print(f"{row['occurred_at']}  {row['account'] or '系统'}"
+              f"  {row['action']}  {row['target_type']}#{row['target_id']}"
+              f"  {row['result']}")
+
+
+def retry_notifications(conn, user):
+    """Retry failed notifications."""
+    failed = reports.failed_notifications(conn, user)
+    if not failed:
+        print("没有失败通知")
+        return
+    count = notifications.retry_failed(conn, user)
+    print("已补发", count, "条通知")
+
+
 def admin_menu(conn, user):
     """Administrator menu."""
     while True:
-        print("\n1 待审核活动  2 审核活动  3 取消活动  0 退出")
+        print("\n1 待审核活动  2 审核活动  3 取消活动  4 平台汇总"
+              "  5 查询日志  6 补发通知  0 退出")
         choice = ask("请选择：")
         try:
             if choice == "1":
@@ -325,6 +404,12 @@ def admin_menu(conn, user):
                 review_event(conn, user)
             elif choice == "3":
                 cancel_event(conn, user)
+            elif choice == "4":
+                show_summary(conn, user)
+            elif choice == "5":
+                show_logs(conn, user)
+            elif choice == "6":
+                retry_notifications(conn, user)
             elif choice == "0":
                 return
         except ServiceError as exc:
