@@ -5,8 +5,10 @@ import sys
 from datetime import datetime
 
 import auth
+import checkin
 import db
 import events
+import registration
 from models import (
     EVENT_REJECTED,
     ROLE_ADMIN,
@@ -178,17 +180,77 @@ def review_event(conn, user):
     print("审核完成")
 
 
+def do_register(conn, user):
+    """Register for a session and ticket."""
+    event_id = ask_int("活动编号：")
+    show_event(conn, events.get_event(conn, event_id))
+    session_id = ask_int("场次编号：")
+    ticket_id = ask_int("票种编号：")
+    request_id = ask("请求编号（可空，用于重复提交测试）：") or None
+    _, code, message = registration.register(
+        conn, user, session_id, ticket_id, request_id
+    )
+    print(message, "凭证码：", code)
+
+
+def do_waitlist(conn, user):
+    """Join the waitlist of a full session."""
+    event_id = ask_int("活动编号：")
+    show_event(conn, events.get_event(conn, event_id))
+    session_id = ask_int("场次编号：")
+    ticket_id = ask_int("票种编号：")
+    _, position, message = registration.join_waitlist(
+        conn, user, session_id, ticket_id
+    )
+    print(message, "当前候补位置：", position)
+
+
+def show_my_registrations(conn, user):
+    """Print the current user's registrations."""
+    rows = registration.my_registrations(conn, user)
+    if not rows:
+        print("还没有报名记录")
+        return
+    for row in rows:
+        print(f"[{row['id']}] {row['title']} / {row['session_title']}"
+              f" / {row['ticket_name']}  状态：{row['state']}"
+              f"  凭证：{row['code'] or '-'}")
+
+
+def do_cancel(conn, user):
+    """Cancel one own registration."""
+    show_my_registrations(conn, user)
+    registration_id = ask_int("要取消的报名编号：")
+    promoted = registration.cancel_registration(conn, user, registration_id)
+    print("已取消")
+    if promoted:
+        print(f"候补用户 {promoted['user_id']} 已自动递补，"
+              f"凭证码 {promoted['code']}")
+
+
 def participant_menu(conn, user):
     """Participant menu."""
     while True:
-        print("\n1 查询活动  2 活动详情  0 退出")
+        print("\n1 查询活动  2 活动详情  3 报名  4 登记候补"
+              "  5 取消报名  6 我的报名  0 退出")
         choice = ask("请选择：")
-        if choice == "1":
-            browse_events(conn)
-        elif choice == "2":
-            view_event(conn)
-        elif choice == "0":
-            return
+        try:
+            if choice == "1":
+                browse_events(conn)
+            elif choice == "2":
+                view_event(conn)
+            elif choice == "3":
+                do_register(conn, user)
+            elif choice == "4":
+                do_waitlist(conn, user)
+            elif choice == "5":
+                do_cancel(conn, user)
+            elif choice == "6":
+                show_my_registrations(conn, user)
+            elif choice == "0":
+                return
+        except ServiceError as exc:
+            print("操作失败：", exc)
 
 
 def organizer_menu(conn, user):
@@ -218,10 +280,37 @@ def organizer_menu(conn, user):
             print("操作失败：", exc)
 
 
+def show_checker_sessions(conn, user):
+    """Print sessions assigned to the checker."""
+    rows = checkin.my_sessions(conn, user)
+    if not rows:
+        print("没有分配检票场次")
+        return
+    for row in rows:
+        print(f"场次 {row['id']}：{row['event_title']} / {row['title']}"
+              f"  {row['start_time']}  状态：{row['event_state']}")
+
+
+def do_checkin(conn, user):
+    """Verify a credential code."""
+    code = ask("凭证码：")
+    print(checkin.check_in(conn, user, code))
+
+
 def checker_menu(conn, user):
-    """Checker menu placeholder until the check-in service lands."""
-    print("检票功能将在下一阶段实现")
-    return
+    """Checker menu."""
+    while True:
+        print("\n1 我的场次  2 核验凭证  0 退出")
+        choice = ask("请选择：")
+        try:
+            if choice == "1":
+                show_checker_sessions(conn, user)
+            elif choice == "2":
+                do_checkin(conn, user)
+            elif choice == "0":
+                return
+        except ServiceError as exc:
+            print("操作失败：", exc)
 
 
 def admin_menu(conn, user):
