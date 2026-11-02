@@ -12,7 +12,6 @@ import notifications
 import registration
 import reports
 from models import (
-    EVENT_REJECTED,
     ROLE_ADMIN,
     ROLE_CHECKER,
     ROLE_ORGANIZER,
@@ -26,15 +25,19 @@ DB_PATH = os.environ.get(
 
 
 def ask(prompt):
-    """Read one non-empty line from the terminal."""
-    value = input(prompt).strip()
-    return value
+    """Read one line, returning an empty string at end of input."""
+    try:
+        return input(prompt).strip()
+    except EOFError:
+        return ""
 
 
 def ask_int(prompt):
     """Read an integer with a friendly retry loop."""
     while True:
         value = ask(prompt)
+        if not value:
+            raise ServiceError("未输入编号")
         try:
             return int(value)
         except ValueError:
@@ -45,6 +48,8 @@ def ask_time(prompt):
     """Read a timestamp in YYYY-MM-DD HH:MM format."""
     while True:
         value = ask(prompt)
+        if not value:
+            raise ServiceError("未输入时间")
         try:
             return datetime.strptime(value, "%Y-%m-%d %H:%M").strftime(
                 "%Y-%m-%d %H:%M:%S"
@@ -431,7 +436,7 @@ def login_loop(conn):
         print("演示账号：participant1 / organizer1 / checker1 / admin1，密码均为 123456")
         account = ask("账号（直接回车退出）：")
         if not account:
-            return False
+            return
         password = ask("密码：")
         try:
             user = auth.login(conn, account, password)
@@ -440,7 +445,6 @@ def login_loop(conn):
             continue
         print(f"欢迎，{user['display_name']}（{user['role']}）")
         MENUS[user["role"]](conn, user)
-        return True
 
 
 def main():

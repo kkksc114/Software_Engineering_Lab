@@ -19,6 +19,7 @@ from models import (
     ServiceError,
     deadline_open,
     now_text,
+    parse_time,
 )
 
 EDITABLE_STATES = (EVENT_DRAFT, EVENT_REJECTED)
@@ -121,6 +122,10 @@ def create_event(conn, organizer, title, city, category, deadline,
         raise ServiceError("只有组织者可以创建活动")
     if capacity <= 0:
         raise ServiceError("名额必须大于 0")
+    if parse_time(end_time) <= parse_time(start_time):
+        raise ServiceError("结束时间必须晚于开始时间")
+    if parse_time(deadline) >= parse_time(start_time):
+        raise ServiceError("报名截止必须早于场次开始")
     conn.execute("BEGIN IMMEDIATE")
     try:
         cur = conn.execute(
@@ -165,6 +170,8 @@ def add_session(conn, actor, event_id, title, start_time, end_time, capacity):
         raise ServiceError("已发布活动不能新增场次，请先取消后重建")
     if capacity <= 0:
         raise ServiceError("名额必须大于 0")
+    if parse_time(end_time) <= parse_time(start_time):
+        raise ServiceError("结束时间必须晚于开始时间")
     conn.execute("BEGIN IMMEDIATE")
     try:
         cur = conn.execute(
@@ -342,6 +349,10 @@ def finish_due_sessions(conn):
         conn.execute(
             "UPDATE registrations SET state = ? WHERE session_id = ? AND state = ?",
             (ABSENT, row["id"], REGISTERED),
+        )
+        conn.execute(
+            "UPDATE waitlist SET state = ? WHERE session_id = ? AND state = ?",
+            (WAIT_EXPIRED, row["id"], WAIT_WAITING),
         )
         log_action(conn, None, "标记缺席", "session", row["id"], "成功")
         remaining = conn.execute(
